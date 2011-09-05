@@ -1,3 +1,30 @@
+require "rubygems"
+require "ruby-debug"
+
+def line_of_anchors_x(x_off, y, w, material_thickness)
+  num_anchors = (w / 100.0).floor
+  dist_between_anchors = w / (num_anchors + 1)
+  anchors = ""
+
+  0.upto(num_anchors) do |n|
+    anchors << "<rect class='cutline' x='#{x_off+dist_between_anchors/2-5}' y='#{y}' height='#{material_thickness}' width='10' />"
+    x_off += dist_between_anchors
+  end
+  anchors
+end
+
+def line_of_anchors_y(y_off, x, h, material_thickness)
+  num_anchors = (h / 100.0).floor
+  dist_between_anchors = h / (num_anchors + 1)
+  anchors = ""
+
+  0.upto(num_anchors) do |n|
+    anchors << "<rect class='cutline' y='#{y_off+dist_between_anchors/2-5}' x='#{x}' width='#{material_thickness}' height='10' />"
+    y_off += dist_between_anchors
+  end
+  anchors
+end
+
 def draw_face(x, y, w, h, material_thickness)
   puts <<-EOF 
   <g transform='translate(#{x} #{y})'>
@@ -10,25 +37,25 @@ def draw_face(x, y, w, h, material_thickness)
       "
       class="cutline"
     />
-    <rect class="cutline" x="#{w/2 - 5}" y="#{material_thickness}" width="10" height="#{material_thickness}" />
-    <rect class="cutline" x="#{w/2 - 5}" y="#{h-2*material_thickness}" width="10" height="#{material_thickness}" />
-    <rect class="cutline" x="#{material_thickness}" y="#{h/2-5}" width="#{material_thickness}" height="10" />
-    <rect class="cutline" x="#{w-2*material_thickness}" y="#{h/2-5}" width="#{material_thickness}" height="10" />
+    #{line_of_anchors_x(material_thickness, material_thickness, w - 2*material_thickness, material_thickness)}
+    #{line_of_anchors_x(material_thickness, h-2*material_thickness, w - 2*material_thickness, material_thickness)}
+    #{line_of_anchors_y(material_thickness, w-2*material_thickness, h - 2*material_thickness, material_thickness)}
+    #{line_of_anchors_y(material_thickness, material_thickness, h - 2*material_thickness, material_thickness)}
+
   </g>
   EOF
 end
 
 def draw_side(x, y, w, h, material_thickness, rotate = false, flip = false, screw_width = 3.0)
-  num_anchors = (w / 100.0).ceil
+  num_anchors = (w / 100.0).floor
   dist_between_anchors = w / (num_anchors + 1)
   anchors = ""
-  x = 0
+
   0.upto(num_anchors) do |n|
     anchors << "h#{dist_between_anchors/2-5}v#{material_thickness}h10v-#{material_thickness}"
-    [x+dist_between_anchors/2-5,x+dist_between_anchors/2+5]
-    x+=dist_between_anchors
+    anchors << "h#{dist_between_anchors/2-5}"
   end
-  anchors << "h#{dist_between_anchors/2-5}"
+  
 
   puts <<-EOF
   <g transform='translate(#{x} #{y}) #{rotate ? "translate(#{h}, 0) rotate(90)" : "" } rotate(#{flip ? 180 : 0}, #{w/2}, #{h/2})'>
@@ -37,7 +64,7 @@ def draw_side(x, y, w, h, material_thickness, rotate = false, flip = false, scre
       v#{h - material_thickness}
       #{anchors}
       v-#{h - material_thickness}
-      h#{w}'
+      h-#{w}'
       class="cutline"
     />
     <rect class="cutline" x="#{w/2 - 5 - 10}" y="#{material_thickness}" width="10" height="#{material_thickness}" />
@@ -189,7 +216,8 @@ document.getElementById('body').setAttribute("class", "invalid");
     style="width:100%; height:100%; position:absolute; top:0; left:0; z-index:-1;">
 EOF
 
-draw_side(top_side_origin_x, top_side_origin_y, side_width, side_height, material_thickness)
+# debugger
+draw_side(top_side_origin_x, top_side_origin_y, side_width, side_height, material_thickness, false, false)
 draw_face(faceplate_origin_x, faceplate_origin_y, faceplate_width, faceplate_height, material_thickness)
 draw_side(bottom_side_origin_x, bottom_side_origin_y, side_width, side_height, material_thickness, false, true)
 draw_side(right_side_origin_x, right_side_origin_y, right_side_width, right_side_height, material_thickness, true, false)
