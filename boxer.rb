@@ -1,11 +1,16 @@
 require "rubygems"
 require "ruby-debug"
 
-def line_of_anchors_x(x_off, y, w, material_thickness)
-  num_anchors = (w / 100.0).floor
-  dist_between_anchors = w / (num_anchors + 1)
-  anchors = ""
+def compute_anchor_dims(d)
+  num_anchors = (d / 100.0).floor - 1
+  dist_between_anchors = d / (num_anchors + 1)
+  [num_anchors, dist_between_anchors]
+end
 
+def line_of_anchors_x(x_off, y, w, material_thickness)
+  num_anchors, dist_between_anchors = compute_anchor_dims(w)
+
+  anchors = ""
   0.upto(num_anchors) do |n|
     anchors << "<rect class='cutline' x='#{x_off+dist_between_anchors/2-5}' y='#{y}' height='#{material_thickness}' width='10' />"
     x_off += dist_between_anchors
@@ -14,10 +19,9 @@ def line_of_anchors_x(x_off, y, w, material_thickness)
 end
 
 def line_of_anchors_y(y_off, x, h, material_thickness)
-  num_anchors = (h / 100.0).floor
-  dist_between_anchors = h / (num_anchors + 1)
-  anchors = ""
+  num_anchors, dist_between_anchors = compute_anchor_dims(h)
 
+  anchors = ""
   0.upto(num_anchors) do |n|
     anchors << "<rect class='cutline' y='#{y_off+dist_between_anchors/2-5}' x='#{x}' width='#{material_thickness}' height='10' />"
     y_off += dist_between_anchors
@@ -47,10 +51,9 @@ def draw_face(x, y, w, h, material_thickness)
 end
 
 def draw_side(x, y, w, h, material_thickness, rotate = false, flip = false, screw_width = 3.0, incut=true)
-  num_anchors = (w / 100.0).floor
-  dist_between_anchors = w / (num_anchors + 1)
-  anchors = ""
+  num_anchors, dist_between_anchors = compute_anchor_dims(w)
 
+  anchors = ""
   0.upto(num_anchors) do |n|
     anchors << "h#{dist_between_anchors/2-5 - (n==0 && !incut ? material_thickness : 0)}v#{material_thickness}h10v-#{material_thickness}"
     anchors << "h#{dist_between_anchors/2-5 - (n==num_anchors && !incut ? material_thickness : 0)}"
@@ -85,78 +88,56 @@ def draw_side(x, y, w, h, material_thickness, rotate = false, flip = false, scre
   EOF
 end
 
-def screw_slot(h, v, x_dir, y_dir, screw_width, screw_length)
+def draw_bottom_edge(x, y, w, r, material_thickness, screw_width, screw_length)
+  num_anchors, dist = compute_anchor_dims(w)
+  p = ""
+  0.upto(num_anchors) do |n|
+    p << "h#{dist/2 - 15 - (n==0 ? material_thickness : 0)}"
+    p << "v-#{material_thickness}"
+    p << "h10"
+    p << "v#{material_thickness}"
+
+    p << "h#{5-screw_width/2}"
+    p << "v#{(screw_length / 2 - screw_width / 2)}"
+    p << "h-#{screw_width / 2}"
+    p << "v#{screw_width}"
+    p << "h#{screw_width / 2}"
+    p << "v#{(screw_length / 2 - screw_width / 2)}"
+    p << "h#{screw_width}"
+    p << "v-#{ (screw_length / 2 - screw_width / 2)}"
+    p << "h#{screw_width / 2}"
+    p << "v-#{ screw_width}"
+    p << "h-#{screw_width / 2}"
+    p << "v-#{ (screw_length / 2 - screw_width / 2)}"
+    p << "h#{(5 - screw_width / 2)}"
+
+    p << "v-#{material_thickness}"
+    p << "h10"
+    p << "v#{material_thickness}"
+    p << "h#{dist/2 - 15 - (n==num_anchors ? material_thickness : 0)}"
+  end
+
   <<-EOF
-  #{h}#{x_dir * (5-screw_width/2)}
-  #{v}#{y_dir * (screw_length / 2 - screw_width / 2)}
-  #{h}#{-x_dir *screw_width / 2}
-  #{v}#{y_dir * screw_width}
-  #{h}#{x_dir *screw_width / 2}
-  #{v}#{y_dir * (screw_length / 2 - screw_width / 2)}
-  #{h}#{x_dir *screw_width}
-  #{v}#{-y_dir * (screw_length / 2 - screw_width / 2)}
-  #{h}#{x_dir *screw_width / 2}
-  #{v}#{-y_dir * screw_width}
-  #{h}#{-x_dir *screw_width / 2}
-  #{v}#{-y_dir * (screw_length / 2 - screw_width / 2)}
-  #{h}#{x_dir * (5 - screw_width / 2)}
+  <path transform="translate(#{x}, #{y}) rotate(#{r})"
+    d="
+      M#{material_thickness} #{material_thickness}
+      #{p}
+    "
+    class="cutline"
+  />
   EOF
 end
 
 def draw_bottom(x, y, w, h, material_thickness, screw_width, screw_length)
+  num_anchors_x, distance_x = compute_anchor_dims(w)
+  num_anchors_y, distance_y = compute_anchor_dims(h)
+
   puts <<-EOF
   <g transform="translate(#{x}, #{y})">
-    <path d="
-      M#{material_thickness} #{material_thickness}
-      h#{w/2 - 15 - material_thickness}
-      v-#{material_thickness}
-      h10
-      v#{material_thickness}
-
-      #{screw_slot("h", "v", 1, 1, screw_width, screw_length)}
-
-      v-#{material_thickness}
-      h10
-      v#{material_thickness}
-      h#{w/2 - 15 - material_thickness}
-
-      v#{h/2 - 15 - material_thickness}
-      h#{material_thickness}
-      v10
-      h-#{material_thickness}
-
-      #{screw_slot("v", "h", 1, -1, screw_width, screw_length)}
-
-      h#{material_thickness}
-      v10
-      h-#{material_thickness}
-      v#{h/2 - 15 - material_thickness}
-
-      h-#{w/2 - 15 - material_thickness}
-      v#{material_thickness}
-      h-10
-      v-#{material_thickness}
-
-      #{screw_slot("h", "v", -1, -1, screw_width, screw_length)}
-
-      v#{material_thickness}
-      h-10
-      v-#{material_thickness}
-      h-#{w/2 - 15 - material_thickness}
-
-      v-#{h/2 - 15 - material_thickness}
-      h-#{material_thickness}
-      v-10
-      h#{material_thickness}
-
-      #{screw_slot("v", "h", -1, 1, screw_width, screw_length)}
-
-      h-#{material_thickness}
-      v-10
-      h#{material_thickness}
-      v-#{h/2 - 15 - material_thickness}
-    "
-    class="cutline" />
+    #{draw_bottom_edge(0, 0, w, 0, material_thickness, screw_width, screw_length)}
+    #{draw_bottom_edge(w, 0, h, 90, material_thickness, screw_width, screw_length)}
+    #{draw_bottom_edge(w, h, w, 180, material_thickness, screw_width, screw_length)}
+    #{draw_bottom_edge(0, h, h, 270, material_thickness, screw_width, screw_length)}
   </g>
   EOF
 end
@@ -227,7 +208,7 @@ document.getElementById('body').setAttribute("class", "invalid");
     style="width:100%; height:100%; position:absolute; top:0; left:0; z-index:-1;">
 EOF
 
-# debugger
+
 draw_side(top_side_origin_x, top_side_origin_y, side_width, side_height, material_thickness, false, false)
 draw_face(faceplate_origin_x, faceplate_origin_y, faceplate_width, faceplate_height, material_thickness)
 draw_side(bottom_side_origin_x, bottom_side_origin_y, side_width, side_height, material_thickness, false, true)
