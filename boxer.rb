@@ -36,7 +36,7 @@ def draw_side(x, y, w, h, material_thickness, rotate = false, flip = false, scre
       M0 0
       v#{h - material_thickness}
       #{anchors}
-      v#{h - material_thickness}
+      v-#{h - material_thickness}
       h#{w}'
       class="cutline"
     />
