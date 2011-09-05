@@ -59,19 +59,7 @@ def draw_bottom(x, y, w, h, material_thickness, screw_width, screw_length)
       h10
       v#{material_thickness}
 
-      h#{5 - screw_width / 2}
-      v#{screw_length / 2 - screw_width / 2}
-      h-#{screw_width / 2}
-      v#{screw_width}
-      h#{screw_width / 2}
-      v#{screw_length / 2 - screw_width / 2}
-      h#{screw_width}
-      v-#{screw_length / 2 - screw_width / 2}
-      h#{screw_width / 2}
-      v-#{screw_width}
-      h-#{screw_width / 2}
-      v-#{screw_length / 2 - screw_width / 2}
-      h#{5 - screw_width / 2}
+      #{screw_slot("h", "v", 1, 1, screw_width, screw_length)}
 
       v-#{material_thickness}
       h10
@@ -82,7 +70,9 @@ def draw_bottom(x, y, w, h, material_thickness, screw_width, screw_length)
       h#{material_thickness}
       v10
       h-#{material_thickness}
-      v10
+
+      #{screw_slot("v", "h", 1, -1, screw_width, screw_length)}
+
       h#{material_thickness}
       v10
       h-#{material_thickness}
@@ -92,7 +82,9 @@ def draw_bottom(x, y, w, h, material_thickness, screw_width, screw_length)
       v#{material_thickness}
       h-10
       v-#{material_thickness}
-      h-10
+
+      #{screw_slot("h", "v", -1, -1, screw_width, screw_length)}
+
       v#{material_thickness}
       h-10
       v-#{material_thickness}
@@ -102,7 +94,9 @@ def draw_bottom(x, y, w, h, material_thickness, screw_width, screw_length)
       h-#{material_thickness}
       v-10
       h#{material_thickness}
-      v-10
+
+      #{screw_slot("v", "h", -1, 1, screw_width, screw_length)}
+
       h-#{material_thickness}
       v-10
       h#{material_thickness}
