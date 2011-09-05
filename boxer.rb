@@ -29,32 +29,65 @@ def draw_side(x, y, w, h, material_thickness, rotate = false, flip = false, scre
     <circle cx="#{w/2}" cy="#{material_thickness + screw_width/2}" r="#{screw_width / 2}" fill="none" stroke-width="1" stroke="black" />
   </g>
   EOF
-
-  # print "<path d='"
-  # 
-  # print "M0 0"
-  # 
-  # print "L0 #{h - material_thickness}"
-  # print "L#{w / 2 - 5} #{h - material_thickness}"
-  # print "L#{w / 2 - 5} #{h}"
-  # print "L#{w / 2 + 5} #{h}"
-  # print "L#{w / 2 + 5} #{h - material_thickness}"
-  # print "L#{w} #{h - material_thickness}"
-  # print "L#{w} 0"
-  # print "Z'"
-  # print " transform='translate(#{x} #{y}) #{rotate ? "translate(#{h}, 0) rotate(90)" : "" } rotate(#{flip ? 180 : 0}, #{w/2}, #{h/2})'"
-  # puts "  />"
 end
 
-def draw_bottom(x, y, w, h)
-  print "<path d='"
+def draw_bottom(x, y, w, h, material_thickness, screw_width)
+  puts <<-EOF
+  <g transform="translate(#{x}, #{y})">
+    <path d="
+      M#{material_thickness} #{material_thickness}
+      h#{w/2 - 15 - material_thickness}
+      v-#{material_thickness}
+      h10
+      v#{material_thickness}
+      h10
+      v-#{material_thickness}
+      h10
+      v#{material_thickness}
+      h#{w/2 - 15 - material_thickness}
 
-  print "M#{x} #{y}"
+      v#{h/2 - 15 - material_thickness}
+      h#{material_thickness}
+      v10
+      h-#{material_thickness}
+      v10
+      h#{material_thickness}
+      v10
+      h-#{material_thickness}
+      v#{h/2 - 15 - material_thickness}
 
-  print "L#{x} #{y + h}"
-  print "L#{x + w} #{y + h}"
-  print "L#{x + w} #{y}"
-  puts "Z' fill='none' stroke='black' stroke-width='1' />"
+      h-#{w/2 - 15 - material_thickness}
+      v#{material_thickness}
+      h-10
+      v-#{material_thickness}
+      h-10
+      v#{material_thickness}
+      h-10
+      v-#{material_thickness}
+      h-#{w/2 - 15 - material_thickness}
+
+      v-#{h/2 - 15 - material_thickness}
+      h-#{material_thickness}
+      v-10
+      h#{material_thickness}
+      v-10
+      h-#{material_thickness}
+      v-10
+      h#{material_thickness}
+      v-#{h/2 - 15 - material_thickness}
+    "
+    fill='none' stroke='black' stroke-width='1' />
+  </g>
+  EOF
+  # 
+  # print "<path d='"
+  # 
+  # print "M#{x} #{y}"
+  # 
+  # print "L#{x} #{y + h}"
+  # print "L#{x + w} #{y + h}"
+  # print "L#{x + w} #{y}"
+  # puts "Z' fill='none' stroke='black' stroke-width='1' />"
 end
 
 w, h, d = ARGV.shift.to_f, ARGV.shift.to_f, ARGV.shift.to_f
@@ -130,7 +163,7 @@ back_origin_y = faceplate_origin_y
 back_width = w + material_thickness * 2
 back_height = h + material_thickness * 2
 
-draw_bottom(back_origin_x, back_origin_y, back_width, back_height)
+draw_bottom(back_origin_x, back_origin_y, back_width, back_height, material_thickness, screw_width)
 
 # left side
 
