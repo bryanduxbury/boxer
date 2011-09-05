@@ -3,6 +3,9 @@ require "ruby-debug"
 
 def compute_anchor_dims(d)
   num_anchors = (d / 100.0).floor - 1
+  if (num_anchors < 0)
+    num_anchors = 0
+  end
   dist_between_anchors = d / (num_anchors + 1)
   [num_anchors, dist_between_anchors]
 end
@@ -161,7 +164,7 @@ screw_length, screw_width = ARGV.shift.to_f, ARGV.shift.to_f
 material_thickness = ARGV.shift.to_f
 kerf = ARGV.shift.to_f
 
-SPACING = 5
+SPACING = 3
 
 faceplate_width = w + material_thickness * 4
 faceplate_height = h + material_thickness * 4
