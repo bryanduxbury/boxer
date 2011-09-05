@@ -54,9 +54,16 @@ def draw_side(x, y, w, h, material_thickness, rotate = false, flip = false, scre
   num_anchors, dist_between_anchors = compute_anchor_dims(w)
 
   anchors = ""
+  bottom_slots = ""
+  x_off = 0
   0.upto(num_anchors) do |n|
     anchors << "h#{dist_between_anchors/2-5 - (n==0 && !incut ? material_thickness : 0)}v#{material_thickness}h10v-#{material_thickness}"
     anchors << "h#{dist_between_anchors/2-5 - (n==num_anchors && !incut ? material_thickness : 0)}"
+
+    bottom_slots << "<rect class='cutline' x='#{x_off + dist_between_anchors / 2 - 15}' y='#{material_thickness}' height='#{material_thickness}' width='10' />"
+    bottom_slots << "<circle class='cutline' cx='#{x_off + dist_between_anchors / 2}' cy='#{material_thickness + screw_width/2}' r='#{screw_width / 2}' />"
+    bottom_slots << "<rect class='cutline' x='#{x_off + dist_between_anchors / 2 + 5}' y='#{material_thickness}' height='#{material_thickness}' width='10' />"
+    x_off += dist_between_anchors
   end
 
   adjusted_height = h-material_thickness
@@ -71,6 +78,8 @@ def draw_side(x, y, w, h, material_thickness, rotate = false, flip = false, scre
     rside = "v-#{adjusted_height / 2 - 5}h#{material_thickness}v-10h-#{material_thickness}v-#{adjusted_height / 2 - 5}"
   end
 
+  
+
   puts <<-EOF
   <g transform='translate(#{x} #{y}) #{rotate ? "translate(#{h}, 0) rotate(90)" : "" } rotate(#{flip ? 180 : 0}, #{w/2}, #{h/2})'>
     <path d='
@@ -81,9 +90,7 @@ def draw_side(x, y, w, h, material_thickness, rotate = false, flip = false, scre
       h-#{incut ? w : w - 2 * material_thickness}'
       class="cutline"
     />
-    <rect class="cutline" x="#{w/2 - 5 - 10}" y="#{material_thickness}" width="10" height="#{material_thickness}" />
-    <rect class="cutline" x="#{w/2 + 5}" y="#{material_thickness}" width="10" height="#{material_thickness}" />
-    <circle class="cutline" cx="#{w/2}" cy="#{material_thickness + screw_width/2}" r="#{screw_width / 2}" />
+    #{bottom_slots}
   </g>
   EOF
 end
