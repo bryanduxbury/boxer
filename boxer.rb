@@ -31,7 +31,25 @@ def draw_side(x, y, w, h, material_thickness, rotate = false, flip = false, scre
   EOF
 end
 
-def draw_bottom(x, y, w, h, material_thickness, screw_width)
+def screw_slot(h, v, x_dir, y_dir, screw_width, screw_length)
+  <<-EOF
+  #{h}#{x_dir * (5-screw_width/2)}
+  #{v}#{y_dir * (screw_length / 2 - screw_width / 2)}
+  #{h}#{-x_dir *screw_width / 2}
+  #{v}#{y_dir * screw_width}
+  #{h}#{x_dir *screw_width / 2}
+  #{v}#{y_dir * (screw_length / 2 - screw_width / 2)}
+  #{h}#{x_dir *screw_width}
+  #{v}#{-y_dir * (screw_length / 2 - screw_width / 2)}
+  #{h}#{x_dir *screw_width / 2}
+  #{v}#{-y_dir * screw_width}
+  #{h}#{-x_dir *screw_width / 2}
+  #{v}#{-y_dir * (screw_length / 2 - screw_width / 2)}
+  #{h}#{x_dir * (5 - screw_width / 2)}
+  EOF
+end
+
+def draw_bottom(x, y, w, h, material_thickness, screw_width, screw_length)
   puts <<-EOF
   <g transform="translate(#{x}, #{y})">
     <path d="
@@ -40,7 +58,21 @@ def draw_bottom(x, y, w, h, material_thickness, screw_width)
       v-#{material_thickness}
       h10
       v#{material_thickness}
-      h10
+
+      h#{5 - screw_width / 2}
+      v#{screw_length / 2 - screw_width / 2}
+      h-#{screw_width / 2}
+      v#{screw_width}
+      h#{screw_width / 2}
+      v#{screw_length / 2 - screw_width / 2}
+      h#{screw_width}
+      v-#{screw_length / 2 - screw_width / 2}
+      h#{screw_width / 2}
+      v-#{screw_width}
+      h-#{screw_width / 2}
+      v-#{screw_length / 2 - screw_width / 2}
+      h#{5 - screw_width / 2}
+
       v-#{material_thickness}
       h10
       v#{material_thickness}
@@ -91,7 +123,7 @@ def draw_bottom(x, y, w, h, material_thickness, screw_width)
 end
 
 w, h, d = ARGV.shift.to_f, ARGV.shift.to_f, ARGV.shift.to_f
-screw_len, screw_width = ARGV.shift.to_f, ARGV.shift.to_f
+screw_length, screw_width = ARGV.shift.to_f, ARGV.shift.to_f
 material_thickness = ARGV.shift.to_f
 kerf = ARGV.shift.to_f
 
@@ -163,7 +195,7 @@ back_origin_y = faceplate_origin_y
 back_width = w + material_thickness * 2
 back_height = h + material_thickness * 2
 
-draw_bottom(back_origin_x, back_origin_y, back_width, back_height, material_thickness, screw_width)
+draw_bottom(back_origin_x, back_origin_y, back_width, back_height, material_thickness, screw_width, screw_length)
 
 # left side
 
