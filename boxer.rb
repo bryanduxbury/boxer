@@ -29,7 +29,7 @@ def line_of_anchors_y(y_off, x, h, material_thickness)
   anchors
 end
 
-def draw_face(x, y, w, h, material_thickness)
+def draw_face(x, y, w, h, material_thickness, screw_width)
   puts <<-EOF 
   <g transform='translate(#{x} #{y})'>
     <path d="
@@ -46,6 +46,10 @@ def draw_face(x, y, w, h, material_thickness)
     #{line_of_anchors_y(material_thickness, w-2*material_thickness, h - 2*material_thickness, material_thickness)}
     #{line_of_anchors_y(material_thickness, material_thickness, h - 2*material_thickness, material_thickness)}
 
+    <circle class="cutline" cx="#{3*material_thickness + screw_width / 2}" cy="#{3*material_thickness + screw_width / 2}" r="#{screw_width / 2}" />
+    <circle class="cutline" cx="#{3*material_thickness + screw_width / 2}" cy="#{h - (3*material_thickness + screw_width / 2)}" r="#{screw_width / 2}" />
+    <circle class="cutline" cx="#{w - (3*material_thickness + screw_width / 2)}" cy="#{3*material_thickness + screw_width / 2}" r="#{screw_width / 2}" />
+    <circle class="cutline" cx="#{w - (3*material_thickness + screw_width / 2)}" cy="#{h - (3*material_thickness + screw_width / 2)}" r="#{screw_width / 2}" />
   </g>
   EOF
 end
@@ -77,8 +81,6 @@ def draw_side(x, y, w, h, material_thickness, rotate = false, flip = false, scre
     lside = "M#{material_thickness} 0v#{adjusted_height / 2 - 5}h-#{material_thickness}v10h#{material_thickness}v#{adjusted_height / 2 - 5}"
     rside = "v-#{adjusted_height / 2 - 5}h#{material_thickness}v-10h-#{material_thickness}v-#{adjusted_height / 2 - 5}"
   end
-
-  
 
   puts <<-EOF
   <g transform='translate(#{x} #{y}) #{rotate ? "translate(#{h}, 0) rotate(90)" : "" } rotate(#{flip ? 180 : 0}, #{w/2}, #{h/2})'>
@@ -145,6 +147,11 @@ def draw_bottom(x, y, w, h, material_thickness, screw_width, screw_length)
     #{draw_bottom_edge(w, 0, h, 90, material_thickness, screw_width, screw_length)}
     #{draw_bottom_edge(w, h, w, 180, material_thickness, screw_width, screw_length)}
     #{draw_bottom_edge(0, h, h, 270, material_thickness, screw_width, screw_length)}
+
+    <circle class="cutline" cx="#{2*material_thickness + screw_width / 2}" cy="#{2*material_thickness + screw_width / 2}" r="#{screw_width / 2}" />
+    <circle class="cutline" cx="#{2*material_thickness + screw_width / 2}" cy="#{h - (2*material_thickness + screw_width / 2)}" r="#{screw_width / 2}" />
+    <circle class="cutline" cx="#{w - (2*material_thickness + screw_width / 2)}" cy="#{2*material_thickness + screw_width / 2}" r="#{screw_width / 2}" />
+    <circle class="cutline" cx="#{w - (2*material_thickness + screw_width / 2)}" cy="#{h - (2*material_thickness + screw_width / 2)}" r="#{screw_width / 2}" />    
   </g>
   EOF
 end
@@ -217,7 +224,7 @@ EOF
 
 
 draw_side(top_side_origin_x, top_side_origin_y, side_width, side_height, material_thickness, false, false)
-draw_face(faceplate_origin_x, faceplate_origin_y, faceplate_width, faceplate_height, material_thickness)
+draw_face(faceplate_origin_x, faceplate_origin_y, faceplate_width, faceplate_height, material_thickness, screw_width)
 draw_side(bottom_side_origin_x, bottom_side_origin_y, side_width, side_height, material_thickness, false, true)
 draw_side(right_side_origin_x, right_side_origin_y, right_side_width, right_side_height, material_thickness, true, false, screw_width, false)
 draw_bottom(back_origin_x, back_origin_y, back_width, back_height, material_thickness, screw_width, screw_length)
